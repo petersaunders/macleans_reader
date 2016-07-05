@@ -1,2 +1,2 @@
-# macleans_reader
-Utilities for reading Macleans Canada news feeds
+# Maclean's Reader
+Utilities for reading Maclean's Canada news feeds
