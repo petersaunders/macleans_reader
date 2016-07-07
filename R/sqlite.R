@@ -52,6 +52,7 @@ readSqlFile <- function(sqlfile) {
     return(sqlQueries)
 }
 
+
 #' Insert or Update Row
 #' 
 #' This does an insert ignore and then updates the row if
@@ -66,16 +67,16 @@ insertOrUpdate <- function(con, table, key, data) {
 
     #Generate insert-or-ignore query
     insertQuery = paste("INSERT OR IGNORE INTO ", table, " (",
-                    paste(names(data), collapse=", "), ") VALUES (",
-                    paste("@", names(data), sep="", collapse=", "), ");", sep="")
+                        paste(names(data), collapse=", "), ") VALUES (",
+                        paste("@", names(data), sep="", collapse=", "), ");", sep="")
 
 
     #Generate update query
     updateQuery = paste("UPDATE ", table, " SET ",
-                    paste(names(data), names(data), sep="=@", collapse=", "), 
-                    " WHERE CHANGES()=0 AND ", 
-                    paste(key, key, sep="=@", collapse=" AND "), ";",
-                    sep="")
+                        paste(names(data), names(data), sep="=@", collapse=", "), 
+                        " WHERE CHANGES()=0 AND ", 
+                        paste(key, key, sep="=@", collapse=" AND "), ";",
+                        sep="")
 
     #Get last addressed id
     #TODO: this hard-codes the id column name as 'id'
@@ -94,11 +95,12 @@ insertOrUpdate <- function(con, table, key, data) {
     return(as.integer(id_df[['id']]))
 }
 
+
 #' Write a feed to the database
 write_feed <- function(feed, con) {
     channel = feed[['channel']]
 
-    cat("\tWriting channel '", channel@name, "'...\n", sep="")
+    #cat("\tWriting channel '", channel@name, "'...\n", sep="")
     channel_id = write_channel(channel, con)
 
     # Write articles
