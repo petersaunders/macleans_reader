@@ -19,3 +19,28 @@ MacleansArticle <- setClass("MacleansArticle",
                                          comment_url     = "character",
                                          comment_count   = "integer"
                     ))
+
+# Standard methods
+#' Print method for channel object
+setMethod("show", "MacleansRSSChannel",
+        function(object) {
+            cat("MacleansRSSChannel:", object@name, ":", object@url)
+        }
+)
+
+#' Print method for article object
+setMethod("show", "MacleansArticle",
+        function(object) {
+            DISP_WIDTH = 100
+            cat("MacleansArticle:",
+                    paste(rep("-", DISP_WIDTH), collapse=""),
+                    strtrim(object@title, DISP_WIDTH), "", 
+                    strtrim(object@description, DISP_WIDTH), "",
+                    strtrim(object@content, DISP_WIDTH), "",
+                    paste("Creator:", object@creator),
+                    paste("Published:", object@pubdate),
+                    paste("URL:", object@url),
+                    paste("Comments:", object@comment_count),
+                            sep="\n")
+        }
+)
