@@ -4,5 +4,6 @@ DROP TABLE IF EXISTS Category;
 
 CREATE TABLE Category (
     id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    name    VARCHAR(255)
+    name    VARCHAR(255),
+    UNIQUE(name)
 );

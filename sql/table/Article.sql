@@ -3,14 +3,15 @@
  DROP TABLE IF EXISTS Article;
 
 CREATE TABLE Article (
-    id
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
     title           VARCHAR(255),
     description     TEXT,
     content         TEXT,
-    creator_id      INTEGER,
-    pub_date        DATETIME,
+    creator         VARCHAR(255),
+    pubdate         DATETIME,
     url             VARCHAR(255),
     guid            VARCHAR(255),
     comment_url     VARCHAR(255),
-    comment_count   INTEGER
+    comment_count   INTEGER,
+    UNIQUE(url)
 );
