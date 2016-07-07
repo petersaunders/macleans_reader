@@ -39,14 +39,29 @@ write_feed(main_feed, conn)
 write_feed(multimedia_feed, conn)
 write_feed(sports_feed, conn)
 
-# Look at stored results (NB these obviously depend on what the feeds contained when run)
+# Look at stored results (NB these obviously depend on what the feeds contained when retrieved)
 channels    = dbGetQuery(conn, "SELECT * FROM Channel;")
-authors     = dbGetQuery(conn, "SELECT * FROM Creator;")
 categories  = dbGetQuery(conn, "SELECT * FROM Category LIMIT 10;")
 
-# Run some more complex queries
+# Look at views / more complex queries
+jays_articles = dbGetQuery(conn, "SELECT title, url FROM ArticleCategories
+                WHERE category_name LIKE '%jays%';")
+
+brexit_articles = dbGetQuery(conn, "SELECT title, url FROM ArticleCategories
+                                    WHERE category_name LIKE '%brexit%';")
+
+top_authors = dbGetQuery(conn, "SELECT creator, COUNT(DISTINCT(id)) AS article_count 
+                                  FROM Article GROUP BY creator
+                                  ORDER BY article_count DESC LIMIT 10")
+
+top_categories = dbGetQuery(conn, "SELECT cat.id, cat.name, COUNT(DISTINCT(article_id)) AS article_count
+                                   FROM Category cat 
+                                   JOIN ArticleCategory ac ON cat.id = ac.category_id 
+                                   GROUP BY cat.id 
+                                   ORDER BY article_count DESC LIMIT 10;")
+
 
 # Close db connection
-dbDisconnect(conn)
+invisible(dbDisconnect(conn))
 
 #--- Generate JSON of feeds
