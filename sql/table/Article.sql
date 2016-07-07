@@ -12,7 +12,5 @@ CREATE TABLE Article (
     url             VARCHAR(255),
     guid            VARCHAR(255),
     comment_url     VARCHAR(255),
-    comment_count   INTEGER,
-    created         DATETIME,
-    updated         DATETIME
+    comment_count   INTEGER
 );
