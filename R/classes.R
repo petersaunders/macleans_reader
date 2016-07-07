@@ -3,7 +3,6 @@
 #' RSS Channel Object
 MacleansRSSChannel <- setClass("MacleansRSSChannel",
                                 slots = list(name    = "character",
-                                             title   = "character",
                                              url     = "character")
                                 )
 

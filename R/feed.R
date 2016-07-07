@@ -9,10 +9,10 @@ library(XML)
 #' @examples
 #' \dontrun{
 #'   main_rss = "http://www.macleans.ca/feed/"
-#'   parsed_feed = readMacleansFeed(main_rss)
+#'   multimedia_rss = "http://www.macleans.ca/multimedia/feed/"
 #'
-#'   channel = parsed_feed[["channel"]]
-#'   articles = parsed_feed[["articles"]]
+#'   main_feed = readMacleansFeed(main_rss)
+#'   multimedia_feed = readMacleansFeed(multimedia_rss)
 #' }
 #' 
 #' @import XML
@@ -44,13 +44,15 @@ readMacleansFeed <- function(feed_url) {
 #' @param node_ns the node namespace definitions
 #' @return a MacleansRSSChannel object
 .parseChannel <- function(channel_node, node_ns) {
-    title_xpath = "./title"
-    url_xpath   = "./atom:link[@href]" #require href attr
-    desc_xpath  = "./description"
 
-    title   = .takeFirst(getNodeSet(channel_node, title_xpath))
-    url     = .takeFirst(getNodeSet(channel_node, url_xpath, node_ns), function(x) xmlGetAttr(x, "href"))
-    desc    = .takeFirst(getNodeSet(channel_node, desc_xpath)) #currently unused
+    url_xpath = "./atom:link[@href]" #require href attr
+    url = .takeFirst(getNodeSet(channel_node, url_xpath, node_ns), function(x) xmlGetAttr(x, "href"))
+
+    # Not useful static fields
+    #title_xpath = "./title"
+    #desc_xpath  = "./description"
+    #title   = .takeFirst(getNodeSet(channel_node, title_xpath))
+    #desc    = .takeFirst(getNodeSet(channel_node, desc_xpath)) #currently unused
 
     #derive our name from page url (should be unique)
     name_regex = ".+macleans.ca/(.+)/feed?/"
