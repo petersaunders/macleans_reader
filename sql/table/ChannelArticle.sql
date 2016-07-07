@@ -4,5 +4,6 @@ DROP TABLE IF EXISTS ChannelArticle;
 
 CREATE TABLE ChannelArticle (
     channel_id  INTEGER,
-    article_id  INTEGER
+    article_id  INTEGER,
+    UNIQUE(channel_id, article_id)
 );
