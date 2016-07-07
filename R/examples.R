@@ -40,7 +40,7 @@ write_feed(main_feed, conn)
 write_feed(multimedia_feed, conn)
 write_feed(sports_feed, conn)
 
-# Look at stored results (NB these obviously depend on what the feeds contained when retrieved)
+# Look at stored results (NB results depend on what the feeds contained when retrieved)
 channels    = dbGetQuery(conn, "SELECT * FROM Channel;")
 categories  = dbGetQuery(conn, "SELECT * FROM Category LIMIT 10;")
 
