@@ -6,6 +6,8 @@ library(jsonlite)
 #' @param feed a list containing a channel and an article list
 #' @return a json object representing the feed
 feedToJSON <- function(feed) {
+    #jsonlite almost works out-of-the-box - just have to remove
+    #the objects class attributes
     feed_unclassed = unclassFeed(feed)
     return(jsonlite::toJSON(feed_unclassed, force=TRUE, 
                     auto_unbox=TRUE, pretty=TRUE))

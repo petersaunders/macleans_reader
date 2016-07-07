@@ -63,7 +63,8 @@ top_categories = dbGetQuery(conn, "SELECT cat.id, cat.name, COUNT(DISTINCT(artic
 # Close db connection
 invisible(dbDisconnect(conn))
 
-#--- Generate JSON of feeds
-#jsonlite almost works out-of-the-box
+#--- Generate JSON of feed
 multimedia_json = feedToJSON(multimedia_feed)
+
+#Write feed json to file
 cat(multimedia_json, file="multimedia_feed.json")
