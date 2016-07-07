@@ -29,8 +29,8 @@ initialiseDatabase <- function(dbfile, sqlfolder="sql", overwrite=FALSE) {
     con = dbConnect(SQLite(), dbname=dbfile)
 
     #Run all sql files
-    cat("\tRunning table SQL...\n")
-    for (tb in tables) {
+    for (tb in c(tables, views)) {
+        cat("\tRunning SQL:", tb, "\n")
         tb_sql = readSqlFile(tb)
 
         for (qry in tb_sql) {
@@ -67,7 +67,7 @@ write_feed <- function(feed, con) {
 
     # Write articles
     for (art in feed[['articles']]) {
-        cat("Writing article with url '", art@url, "'...\n", sep="")
+        #cat("Writing article with url '", art@url, "'...\n", sep="")
         write_article(channel_id, art, con)
     }
 }
