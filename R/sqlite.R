@@ -52,22 +52,52 @@ readSqlFile <- function(sqlfile) {
     return(sqlQueries)
 }
 
+#' Insert or Update Row
+#' 
+#' @param insertQuery a prototype for the insert query
+#' @param updateQuery a prototype for the update query
+#' @param data a data-frame / list of parameters
+#' @return the last insert id, if any
+insertOrUpdate <- function(con, table, key, data) {
+
+    #Generate insert-or-ignore query
+    insertQuery = paste("INSERT OR IGNORE INTO ", table, " (",
+                    paste(names(data), collapse=", "), ") VALUES (",
+                    paste("@", names(data), sep="", collapse=", "), ");", sep="")
+
+
+    #Generate update query
+    updateQuery = paste("UPDATE ", table, " SET ",
+                    paste(names(data), names(data), sep="=@", collapse=", "), 
+                    " WHERE CHANGES()=0 AND ", 
+                    paste(key, key, sep="=@", collapse=" AND "), ";",
+                    sep="")
+
+    #Get last addressed id
+    lastIdQuery = paste("SELECT CASE CHANGES() WHEN 0 
+                        THEN LAST_INSERT_ROWID()
+                        ELSE (SELECT id FROM ", table, 
+                        " WHERE ", paste(key, key, sep="=@", collapse=" AND "),
+                        ") END AS id;", sep="")
+
+    #Execute queries
+    dbGetPreparedQuery(con, insertQuery, bind.data=data)
+    dbGetPreparedQuery(con, updateQuery, bind.data=data)
+
+    #Get last addressed row id
+    id_df = dbGetPreparedQuery(con, lastIdQuery, bind.data=data)
+    return(as.integer(id_df[['id']]))
+}
 
 #' Write a feed to the database
 write_feed <- function(feed, con) {
     channel = feed[['channel']]
 
     cat("\tWriting channel '", channel@name, "'...\n", sep="")
-    write_channel(channel, con)
-
-    # Get channel id
-    query = "SELECT id FROM Channel WHERE name=?;"
-    channel_id = dbGetPreparedQuery(con, query, bind.data = data.frame(name=channel@name))[['id']]
-    cat("\tChannel_id for '", channel@name, "': ", channel_id, "\n", sep="")
+    channel_id = write_channel(channel, con)
 
     # Write articles
     for (art in feed[['articles']]) {
-        #cat("Writing article with url '", art@url, "'...\n", sep="")
         write_article(channel_id, art, con)
     }
 }
@@ -77,14 +107,13 @@ write_feed <- function(feed, con) {
 #' 
 #' @param channel the MacleansRSSChannel object
 #' @param con a database connection
+#' @return the channel_id, invisibly
 write_channel <- function(channel, con) {
     stopifnot(class(channel) == "MacleansRSSChannel")
+    channel_df = data.frame(name=channel@name, url=channel@url)
 
-    #Write new channel or ignore error if already exists
-    query = "INSERT OR IGNORE INTO Channel (name, url) VALUES (?, ?);"
-    channel_df = data.frame(name = channel@name, url = channel@url)
-
-    dbGetPreparedQuery(con, query, bind.data=channel_df)
+    channel_id = insertOrUpdate(con, "Channel", "name", channel_df)
+    invisible(channel_id)
 }
 
 
@@ -93,44 +122,35 @@ write_channel <- function(channel, con) {
 #' @param channel_id the id of the channel through which the article was retrieved
 #' @param article the MacleansArticle object to write
 #' @param con a database connection
+#' @return the article_id, invisibly
 write_article <- function(channel_id, article, con) {
     stopifnot(class(article) == "MacleansArticle")
 
-    # Write article item
-    query = "INSERT OR IGNORE INTO Article (title, description, content, creator,
-             pubdate, url, guid, comment_url, comment_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"
+    article_data = data.frame(  title           = article@title,
+                                description     = article@description,
+                                content         = article@content,
+                                creator         = article@creator,
+                                pubdate         = article@pubdate,
+                                url             = article@url,
+                                guid            = article@guid,
+                                comment_url     = article@comment_url,
+                                comment_count   = article@comment_count)
 
-    article_df = data.frame(title           = article@title,
-                            description     = article@description,
-                            content         = article@content,
-                            creator         = article@creator,
-                            pubdate         = article@pubdate,
-                            url             = article@url,
-                            guid            = article@guid,
-                            comment_url     = article@comment_url,
-                            comment_count   = article@comment_count)
+    article_id = insertOrUpdate(con, "Article", "url", article_data)
 
-    dbGetPreparedQuery(con, query, bind.data=article_df)
-
-    # Get article id
-    query = "SELECT * FROM Article WHERE url = ?;"
-    article_id = dbGetPreparedQuery(con, query, bind.data=data.frame(url=article@url))[['id']]
-
-    # Write article-channel association
+    # Update the association table
     query = "INSERT OR IGNORE INTO ChannelArticle (channel_id, article_id) VALUES (?, ?);"
     dbGetPreparedQuery(con, query, bind.data=data.frame(channel_id, article_id))
 
     # Write categories
     for (category in article@categories) {
-        query = "INSERT OR IGNORE INTO Category (name) VALUES (?);"
-        cat_df = data.frame(name = category)
-        dbGetPreparedQuery(con, query, bind.data=cat_df)
+        category_df = data.frame(name = category)
+        category_id = insertOrUpdate(con, "Category", "name", category_df)
 
-        # Write article-category association
-        query = "SELECT * FROM Category WHERE name = ?;"
-        category_id = dbGetPreparedQuery(con, query, bind.data=data.frame(name=category))[['id']]
-
+        #Update the association table
         query = "INSERT OR IGNORE INTO ArticleCategory (article_id, category_id) VALUES (?, ?)"
         dbGetPreparedQuery(con, query, bind.data=data.frame(article_id, category_id))
     }
+
+    invisible(article_id)
 }
