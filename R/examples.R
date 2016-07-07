@@ -41,7 +41,7 @@ write_feed(sports_feed, conn)
 
 # Look at stored results (NB results depend on what the feeds contained when retrieved)
 channels    = dbGetQuery(conn, "SELECT * FROM Channel;")
-categories  = dbGetQuery(conn, "SELECT * FROM Category LIMIT 10;")
+categories  = dbGetQuery(conn, "SELECT * FROM Category LIMIT 20;")
 
 # Look at views / more complex queries
 jays_articles = dbGetQuery(conn, "SELECT title, url FROM ArticleCategories
