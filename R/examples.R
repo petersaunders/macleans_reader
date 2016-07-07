@@ -2,7 +2,8 @@
 source("R/classes.R")
 source("R/feed.R")
 source("R/sqlite.R")
-source("R/json.R")
+
+library(jsonlite)
 
 #--- Feed Reading / Parsing
 
@@ -60,8 +61,10 @@ top_categories = dbGetQuery(conn, "SELECT cat.id, cat.name, COUNT(DISTINCT(artic
                                    GROUP BY cat.id 
                                    ORDER BY article_count DESC LIMIT 10;")
 
-
 # Close db connection
 invisible(dbDisconnect(conn))
 
 #--- Generate JSON of feeds
+#jsonlite almost works out-of-the-box
+multimedia_json = jsonlite::toJSON(multimedia_feed, force=TRUE, auto_unbox=TRUE, pretty=TRUE)
+cat(multimedia_json, file="multimedia_feed.json")
