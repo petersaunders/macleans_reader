@@ -4,6 +4,8 @@ Utilities for reading and storing Maclean's Magazine articles
 ## Background
 The [Maclean's Magazine](http://www.macleans.ca/) publishes news articles and multimedia on their website and provide RSS feeds through the Wordpress platform.  There are multiple channels such as _multimedia_, _sports_, _economy_ etc. which are found at addresses of the format `http://www.macleans.ca/<channel>/feed/` as well as a catch-all main channel found at `http://www.macleans.ca/feed/`.
 
+This code stores a record of the channels which have been retrieved and the articles that were on them. This does not allow you to reproduce the state of any channel at a given time, but it can show the most recent articles from a channel, what channels an article was found on etc.
+
 ## Database
 This code is written to use an [SQLite](http://www.macleans.ca/?p=896743) database.  The SQL _may_ be compatible with other database vendors.  The database interface within the code is entirely SQLite specific.
 
