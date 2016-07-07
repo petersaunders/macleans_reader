@@ -2,8 +2,7 @@
 source("R/classes.R")
 source("R/feed.R")
 source("R/sqlite.R")
-
-library(jsonlite)
+source("R/json.R")
 
 #--- Feed Reading / Parsing
 
@@ -66,5 +65,5 @@ invisible(dbDisconnect(conn))
 
 #--- Generate JSON of feeds
 #jsonlite almost works out-of-the-box
-multimedia_json = jsonlite::toJSON(multimedia_feed, force=TRUE, auto_unbox=TRUE, pretty=TRUE)
+multimedia_json = feedToJSON(multimedia_feed)
 cat(multimedia_json, file="multimedia_feed.json")
