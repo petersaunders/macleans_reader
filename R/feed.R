@@ -24,11 +24,11 @@ readMacleansFeed <- function(feed_url) {
 
     # Parse XML into objects
     rss = xmlRoot(tree)
-    channel = .parseChannel(rss[["channel"]])
+    channel = .parseChannel(rss[["channel"]], doc_namespaces)
 
     item_xpath = "//channel/item"
     #items = getNodeSet(tree, item_xpath, doc_namespaces)
-    articles = xpathSApply(tree, item_xpath, .parseItem, namespaces=doc_namespaces)
+    articles = xpathSApply(tree, item_xpath, .parseItem, node_ns=doc_namespaces)
 
     return(list(channel=channel, articles=articles))
 }
@@ -41,16 +41,16 @@ readMacleansFeed <- function(feed_url) {
 #' should be relative to the channel_node.
 #' 
 #' @param channel_node a <channel> xml node
-#' @param namespaces the document namespaces as a named vector
+#' @param node_ns the node namespace definitions
 #' @return a MacleansRSSChannel object
-.parseChannel <- function(channel_node, namespaces) {
+.parseChannel <- function(channel_node, node_ns) {
     title_xpath = "./title"
     url_xpath   = "./atom:link[@href]" #require href attr
     desc_xpath  = "./description"
 
-    title   = .takeFirst(getNodeSet(channel_node, title_xpath, namespaces))
-    url     = .takeFirst(getNodeSet(channel_node, url_xpath, namespaces), function(x) xmlGetAttr(x, "href"))
-    desc    = .takeFirst(getNodeSet(channel_node, desc_xpath, namespaces)) #currently unused
+    title   = .takeFirst(getNodeSet(channel_node, title_xpath))
+    url     = .takeFirst(getNodeSet(channel_node, url_xpath, node_ns), function(x) xmlGetAttr(x, "href"))
+    desc    = .takeFirst(getNodeSet(channel_node, desc_xpath)) #currently unused
 
     #derive our name from page url (should be unique)
     name_regex = ".+macleans.ca/(.+)/feed?/"
@@ -69,32 +69,45 @@ readMacleansFeed <- function(feed_url) {
 #' Parses an article item from the item XML node
 #' 
 #' @param node an <item> xml node
-#' @param namespaces the document namespaces as a named vector
+#' @param node_ns the node namespace definitions, default null
 #' @return a MacleansArticle object
-.parseItem <- function(item_node, namespaces) {
-    title_xpath = "./title"
-    url_xpath   = "./link"
-    guid_xpath  = "./guid" #take whole url here
-    desc_xpath  = "./description"
-    content_xpath = "./content:encoded"
-    creator_xpath = "./dc:creator"
-    pub_date_xpath = "./pubDate"
-    category_xpath = "./category"
-    comments_url_xpath = "./comments"
-    comments_count_xpath = "./slash:comments"
+.parseItem <- function(item_node, node_ns) {
+    title_xpath             = "./title"
+    desc_xpath              = "./description"
+    content_xpath           = "./content:encoded"
+    creator_xpath           = "./dc:creator"
+    pub_date_xpath          = "./pubDate"
+    category_xpath          = "./category"
+    url_xpath               = "./link"
+    guid_xpath              = "./guid" #take whole url here
+    comment_url_xpath      = "./comments"
+    comment_count_xpath    = "number(./slash:comments)" #get number directly
 
     return(MacleansArticle(
-                title           = .takeFirst(getNodeSet(item_node, title_xpath, namespaces)),
-                description     = .takeFirst(getNodeSet(item_node, desc_xpath, namespaces)),
-                content         = .takeFirst(getNodeSet(item_node, content_xpath, namespaces)),
-                creator         = .takeFirst(getNodeSet(item_node, creator_xpath, namespaces)),
-                pubdate         = .takeFirst(getNodeSet(item_node, pub_date_xpath, namespaces)),
-                categories      = .takeAll(getNodeSet(item_node, category_xpath, namespaces)),
-                url             = .takeFirst(getNodeSet(item_node, url_xpath, namespaces)),
-                guid            = .takeFirst(getNodeSet(item_node, guid_xpath, namespaces)),
-                comment_url     = .takeFirst(getNodeSet(item_node, comments_url_xpath, namespaces)),
-                comment_count   = .takeFirst(getNodeSet(item_node, comments_count_xpath, namespaces))
+                title           = .takeFirst(getNodeSet(item_node, title_xpath)),
+                description     = .takeFirst(getNodeSet(item_node, desc_xpath)),
+                content         = .takeFirst(getNodeSet(item_node, content_xpath, node_ns)),
+                creator         = .takeFirst(getNodeSet(item_node, creator_xpath, node_ns)),
+                pubdate         = .takeFirst(getNodeSet(item_node, pub_date_xpath), getNodeDateTime),
+                categories      = .takeAll(getNodeSet(item_node, category_xpath)),
+                url             = .takeFirst(getNodeSet(item_node, url_xpath)),
+                guid            = .takeFirst(getNodeSet(item_node, guid_xpath)),
+                comment_url     = .takeFirst(getNodeSet(item_node, comment_url_xpath)),
+                comment_count   = .takeFirst(getNodeSet(item_node, comment_count_xpath, node_ns), function(x) as.integer(x))
     ))
+}
+
+
+#' Get POSIX datetime from datetime node
+#' 
+#' Feeds appear to use the format "%a, %d %b %Y %H:%M:%S %z"
+#' E.g. 'Wed, 06 Jul 2016 22:46:32 +0000'
+#' 
+#' @param node an XML node whose value is a datetime string
+#' @param format the date-time format to use for conversion to POSIX object
+#' @return a POSIX date object representation of the node
+getNodeDateTime <- function(node, format="%a, %d %b %Y %H:%M:%S %z") {
+    return(strptime(xmlValue(node), format))
 }
 
 
