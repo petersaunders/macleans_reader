@@ -54,9 +54,13 @@ readSqlFile <- function(sqlfile) {
 
 #' Insert or Update Row
 #' 
-#' @param insertQuery a prototype for the insert query
-#' @param updateQuery a prototype for the update query
-#' @param data a data-frame / list of parameters
+#' This does an insert ignore and then updates the row if
+#' it already exists.
+#' 
+#' @param con a database connection
+#' @param table the table name to write to
+#' @param key the unique-key fields
+#' @param data a data-frame of parameters to store
 #' @return the last insert id, if any
 insertOrUpdate <- function(con, table, key, data) {
 
@@ -74,6 +78,7 @@ insertOrUpdate <- function(con, table, key, data) {
                     sep="")
 
     #Get last addressed id
+    #TODO: this hard-codes the id column name as 'id'
     lastIdQuery = paste("SELECT CASE CHANGES() WHEN 0 
                         THEN LAST_INSERT_ROWID()
                         ELSE (SELECT id FROM ", table, 
