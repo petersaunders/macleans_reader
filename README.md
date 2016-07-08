@@ -2,18 +2,35 @@
 Utilities for reading and storing Maclean's Magazine articles
 
 ## Background
-The [Maclean's Magazine](http://www.macleans.ca/) publishes news articles and multimedia on their website and provide RSS feeds through the Wordpress platform.  There are multiple channels such as _multimedia_, _sports_, _economy_ etc. which are found at addresses of the format `http://www.macleans.ca/<channel>/feed/` as well as a catch-all main channel found at `http://www.macleans.ca/feed/`.
+[Maclean's Magazine](http://www.macleans.ca/) publishes news articles and multimedia on their website and provide RSS feeds through the Wordpress platform.  There are multiple channels such as _multimedia_, _sports_, _economy_ etc. which are found at addresses of the format `http://www.macleans.ca/<channel>/feed/` as well as a catch-all main channel found at `http://www.macleans.ca/feed/`.
 
-This code stores a record of the channels which have been retrieved and the articles that were on them. This does not allow you to reproduce the state of any channel at a given time, but it can show the most recent articles from a channel, what channels an article was found on etc.
+## Code Structure
 
-## Database
-This code is written to use an [SQLite](http://www.macleans.ca/?p=896743) database.  The SQL _may_ be compatible with other database vendors.  The database interface within the code is entirely SQLite specific.
+**/R** - R code for reading and writing feeds
+
+- `examples.R` - example script which reads RSS feeds, writes to database and generates JSON
+- `classes.R` - object definitions
+- `feed.R` - functions for reading and parsing RSS feeds
+- `sqlite.R` - functions for writing objects to a SQLite database
+- `json.R` - functions for writing feeds to JSON
+
+**/sql** - SQLite database definitions
+
+
+## How to run examples script
+
+Run from the command line with RScript, from the project directory using:
+
+`RScript R/examples.R`
+
+Alternatively, from within R, working in the project directory:
+
+`source("R/examples.R", echo=FALSE)`
+
+This will read some feeds from Macleans.ca, print some details, create a SQLite database and store the feeds to it and then write the multimedia feed to a JSON file.
 
 ## Requirements
-This code uses the `XML` and `RSQLite` and `jsonlite` R packages. It was developed with R version 3.2.5 and SQLite 3.8.10.2. 
-
-## Examples
-Fully-functional examples can be found in the `R/examples.R` file.  Functions are documented using ROxygen in-line function documentation which also contains standalone function examples.
+This code uses the `XML` and `RSQLite` and `jsonlite` R packages. It was developed with R version 3.2.5.
 
 
 

@@ -55,7 +55,7 @@ jays_articles = dbGetQuery(conn, "SELECT title, url FROM ArticleCategories
 brexit_articles = dbGetQuery(conn, "SELECT title, url FROM ArticleCategories
                                     WHERE category_name LIKE '%brexit%';")
 
-top_authors = dbGetQuery(conn, "SELECT creator, COUNT(DISTINCT(id)) AS article_count 
+top_authors = dbGetQuery(conn, "SELECT creator, COUNT(DISTINCT(id)) AS article_count
                                   FROM Article GROUP BY creator
                                   ORDER BY article_count DESC LIMIT 10")
 
@@ -63,9 +63,9 @@ cat("Top Authors:\n")
 print(top_authors)
 
 top_categories = dbGetQuery(conn, "SELECT cat.id, cat.name, COUNT(DISTINCT(article_id)) AS article_count
-                                   FROM Category cat 
-                                   JOIN ArticleCategory ac ON cat.id = ac.category_id 
-                                   GROUP BY cat.id 
+                                   FROM Category cat
+                                   JOIN ArticleCategory ac ON cat.id = ac.category_id
+                                   GROUP BY cat.id
                                    ORDER BY article_count DESC LIMIT 10;")
 
 cat("Top Categories:\n")
