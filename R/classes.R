@@ -1,4 +1,5 @@
 # Objects for reading/writing Macleans articles
+library(methods)
 
 #' RSS Channel Object
 MacleansRSSChannel <- setClass("MacleansRSSChannel",
