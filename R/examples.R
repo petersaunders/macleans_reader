@@ -17,13 +17,13 @@ multimedia_feed = readMacleansFeed(MULTIMEDIA_FEED_URL)
 sports_feed     = readMacleansFeed(SPORTS_FEED_URL)
 
 # Feeds are read into nested lists
+cat("Feed Object Structure:\n")
 str(main_feed, max.level=1)
 print(main_feed$channel)
 
-# Print the top article in each feed
-print(main_feed$articles[[1]])
-print(multimedia_feed$articles[[1]])
-print(sports_feed$articles[[1]])
+# Print the top 5 sports articles
+cat("Multimedia Articles:\n")
+print(multimedia_feed$articles[1:5])
 
 #--- Database Writing / Reading ---
 
@@ -32,6 +32,8 @@ initialiseDatabase("example_macleans.db", sqlfolder="sql", overwrite=TRUE)
 
 # Show tables in database
 conn = dbConnect(SQLite(), "example_macleans.db")
+
+cat("Database Tables:\n")
 dbListTables(conn)
 
 # Write all these feeds to the database
@@ -42,6 +44,9 @@ write_feed(sports_feed, conn)
 # Look at stored results (NB results depend on what the feeds contained when retrieved)
 channels    = dbGetQuery(conn, "SELECT * FROM Channel;")
 categories  = dbGetQuery(conn, "SELECT * FROM Category LIMIT 20;")
+
+cat("First Few Categories:\n")
+print(categories)
 
 # Look at views / more complex queries
 jays_articles = dbGetQuery(conn, "SELECT title, url FROM ArticleCategories
@@ -54,11 +59,17 @@ top_authors = dbGetQuery(conn, "SELECT creator, COUNT(DISTINCT(id)) AS article_c
                                   FROM Article GROUP BY creator
                                   ORDER BY article_count DESC LIMIT 10")
 
+cat("Top Authors:\n")
+print(top_authors)
+
 top_categories = dbGetQuery(conn, "SELECT cat.id, cat.name, COUNT(DISTINCT(article_id)) AS article_count
                                    FROM Category cat 
                                    JOIN ArticleCategory ac ON cat.id = ac.category_id 
                                    GROUP BY cat.id 
                                    ORDER BY article_count DESC LIMIT 10;")
+
+cat("Top Categories:\n")
+print(top_categories)
 
 # Close db connection
 invisible(dbDisconnect(conn))
@@ -68,3 +79,4 @@ multimedia_json = feedToJSON(multimedia_feed)
 
 #Write feed json to file
 cat(multimedia_json, file="multimedia_feed.json")
+cat("JSON file written to multimedia_feed.json\n")
